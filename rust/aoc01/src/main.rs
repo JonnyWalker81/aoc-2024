@@ -25,11 +25,11 @@ fn part1(input: &str) -> Result<()> {
     left_list.sort();
     right_list.sort();
 
-    let mut result = vec![];
+    let mut sum = 0;
     for i in 0..left_list.len() {
-        result.push((left_list[i] - right_list[i]).abs());
+        sum += (left_list[i] - right_list[i]).abs();
     }
-    let sum: i32 = result.iter().sum();
+
     println!("{:?}", sum);
     Ok(())
 }
@@ -49,15 +49,13 @@ fn part2(input: &str) -> Result<()> {
         counts.entry(i).and_modify(|e| *e += 1).or_insert(1);
     }
 
-    let mut result = vec![];
+    let mut sum = 0;
     for i in left_list {
         if let Some(v) = counts.get(&i) {
-            result.push(*v * i);
+            sum += *v * i;
         }
     }
 
-    let sum: i32 = result.iter().sum();
     println!("{:?}", sum);
-
     Ok(())
 }
