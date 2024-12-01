@@ -1,1 +1,2 @@
 rust/.direnv
+/rust/target/

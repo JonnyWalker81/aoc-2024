@@ -9,7 +9,7 @@
         [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }:
         let
-          inherit (pkgs) dockerTools rustPlatform;
+          inherit (pkgs) dockerTools rustPlatform nodejs_20 clippy;
           inherit (dockerTools) buildImage;
           inherit (rustPlatform) buildRustPackage;
           name = "example";
@@ -17,7 +17,7 @@
         in {
           devShells = {
             default = pkgs.mkShell {
-              buildInputs = [ pkgs.pkg-config pkgs.openssl ];
+              buildInputs = [ pkgs.pkg-config pkgs.openssl nodejs_20 clippy];
               inputsFrom = [ self'.packages.default ];
             };
           };
