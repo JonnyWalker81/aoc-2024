@@ -13,6 +13,34 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+impl Direction {
+    fn rotate(&self) -> Direction {
+        match *self {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        }
+    }
+
+    fn dir(&self) -> (i32, i32) {
+        match *self {
+            Direction::Up => (-1, 0),
+            Direction::Right => (0, 1),
+            Direction::Down => (1, 0),
+            Direction::Left => (0, -1),
+        }
+    }
+}
+
 fn part1(input: &str) -> Result<()> {
     let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
 
@@ -52,7 +80,7 @@ fn part2(input: &str) -> Result<()> {
         for c in 0..grid[0].len() {
             if grid[r][c] == '.' {
                 grid[r][c] = '#';
-                if simulateLoop(start, &grid) {
+                if simulate_loop(start, &grid) {
                     // println!("Loop found at: {}, {}", r, c);
                     locs.insert((r, c));
                 }
@@ -67,14 +95,14 @@ fn part2(input: &str) -> Result<()> {
 }
 
 fn simulate(start: (usize, usize), grid: &[Vec<char>]) -> HashSet<(usize, usize)> {
-    let mut dir: (i32, i32) = (-1, 0);
+    let mut dir = Direction::Up;
 
     let mut locs: HashSet<(usize, usize)> = HashSet::new();
     locs.insert(start);
 
     let mut current: (i32, i32) = (start.0 as i32, start.1 as i32);
     loop {
-        current = (current.0 + dir.0, current.1 + dir.1);
+        current = (current.0 + dir.dir().0, current.1 + dir.dir().1);
 
         // check if out of grid bounds
         if current.0 < 0
@@ -87,16 +115,10 @@ fn simulate(start: (usize, usize), grid: &[Vec<char>]) -> HashSet<(usize, usize)
 
         if grid[current.0 as usize][current.1 as usize] == '#' {
             // backup
-            current = (current.0 - dir.0, current.1 - dir.1);
+            current = (current.0 - dir.dir().0, current.1 - dir.dir().1);
 
             // turn right
-            dir = match dir {
-                (-1, 0) => (0, 1),
-                (0, 1) => (1, 0),
-                (1, 0) => (0, -1),
-                (0, -1) => (-1, 0),
-                _ => panic!("invalid direction"),
-            };
+            dir = dir.rotate();
         }
 
         locs.insert((current.0 as usize, current.1 as usize));
@@ -105,39 +127,8 @@ fn simulate(start: (usize, usize), grid: &[Vec<char>]) -> HashSet<(usize, usize)
     locs
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    fn rotate(&self) -> Direction {
-        match *self {
-            Direction::Up => Direction::Right,
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
-        }
-    }
-
-    fn dir(&self) -> (i32, i32) {
-        match *self {
-            Direction::Up => (-1, 0),
-            Direction::Right => (0, 1),
-            Direction::Down => (1, 0),
-            Direction::Left => (0, -1),
-        }
-    }
-}
-
-fn simulateLoop(start: (usize, usize), grid: &[Vec<char>]) -> bool {
+fn simulate_loop(start: (usize, usize), grid: &[Vec<char>]) -> bool {
     let mut dir = Direction::Up;
-
-    // let mut locs: HashSet<(usize, usize)> = HashSet::new();
-    // locs.insert((start.0, start.1, Direction::Up));
 
     let mut visited: HashSet<(usize, usize, Direction)> = HashSet::new();
     visited.insert((start.0, start.1, Direction::Up));
@@ -168,9 +159,7 @@ fn simulateLoop(start: (usize, usize), grid: &[Vec<char>]) -> bool {
         }
 
         visited.insert((current.0 as usize, current.1 as usize, dir));
-        // locs.insert((current.0 as usize, current.1 as usize));
     }
 
-    // locs
     false
 }
