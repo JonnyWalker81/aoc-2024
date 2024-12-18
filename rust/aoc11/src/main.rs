@@ -49,6 +49,7 @@ fn part2(input: &str) -> Result<()> {
     }
 
     println!("{}", sum);
+    println!("{}", memo.len());
 
     Ok(())
 }
