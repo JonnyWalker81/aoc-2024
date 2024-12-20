@@ -1,7 +1,6 @@
 [package]
-name = "aoc16"
+name = "aoc20"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-pathfinding = "4.12.0"
