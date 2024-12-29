@@ -101,6 +101,7 @@ fn part2(input: &str) -> Result<()> {
     let mut start: (i64, i64) = (0, 0);
     let mut end: (i64, i64) = (0, 0);
     let mut walls = HashSet::new();
+    let mut path = HashSet::new();
 
     for r in 0..grid.len() {
         for c in 0..grid[r].len() {
@@ -112,36 +113,14 @@ fn part2(input: &str) -> Result<()> {
                 }
                 _ => (),
             };
-        }
-    }
 
-    let mut dist_from_start = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    let mut dist_to_end = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-
-    for r in 0..grid.len() {
-        for c in 0..grid[r].len() {
-            if grid[r][c] == '#' {
-                continue;
+            if grid[r][c] != '#' {
+                path.insert((r as i64, c as i64));
             }
-
-            dist_from_start[r][c] = bfs(&grid, &walls, start, (r as i64, c as i64));
-            dist_to_end[r][c] = bfs(&grid, &walls, end, (r as i64, c as i64));
         }
     }
 
-    let base_time = bfs(&grid, &walls, start, end);
-    // println!("{}", base_time);
-
-    let count = check_cheats_bfs(
-        &grid,
-        &walls,
-        start,
-        &dist_from_start,
-        &dist_to_end,
-        base_time as i64,
-        100,
-        20,
-    );
+    let count = cheats_bfs(&grid, &path, &walls, start, end, 100);
 
     println!("{}", count);
 
@@ -355,4 +334,78 @@ fn bfs(
     }
 
     0
+}
+
+fn cheats_bfs(
+    grid: &[Vec<char>],
+    path: &HashSet<(i64, i64)>,
+    walls: &HashSet<(i64, i64)>,
+    start: (i64, i64),
+    end: (i64, i64),
+    limit: usize,
+) -> usize {
+    let mut queue = VecDeque::from([(start, 0)]);
+    let mut visited = HashSet::new();
+
+    let mut dist: HashMap<(i64, i64), usize> = HashMap::new();
+    let mut backlink: HashMap<(i64, i64), (i64, i64)> = HashMap::new();
+
+    while let Some((pos, time)) = queue.pop_front() {
+        if pos == end {
+            break;
+        }
+
+        if visited.contains(&pos) {
+            continue;
+        }
+
+        visited.insert(pos);
+
+        for dir in &[(0, 1), (0, -1), (1, 0), (-1, 0)] {
+            let next = (pos.0 + dir.0, pos.1 + dir.1);
+            let next_time = time + 1;
+            if !path.contains(&next) {
+                continue;
+            }
+
+            if !visited.contains(&next) {
+                let entry = dist.entry(pos).or_insert(usize::MAX);
+                if next_time < *entry {
+                    *entry = next_time;
+                    backlink.insert(next, pos);
+                }
+            }
+            queue.push_back((next, next_time + 1));
+        }
+    }
+
+    let mut path = VecDeque::from([end]);
+    let mut current = end;
+    while let Some(entry) = backlink.get(&current) {
+        path.push_front(*entry);
+        current = *entry;
+    }
+
+    println!("{:?}", path.len());
+
+    let mut cheats: HashMap<usize, usize> = HashMap::new();
+    for i in 0..path.len() - 1 {
+        for j in i + 1..path.len() {
+            let dist = manhattan_distance(path[i], path[j]) as usize;
+            if dist < 21 && (j - i) > dist {
+                *cheats.entry((j - i) - dist).or_default() += 1;
+            }
+        }
+    }
+
+    let count: usize = cheats
+        .iter()
+        .filter_map(|(k, v)| if *k >= limit { Some(v) } else { None })
+        .sum();
+
+    count
+}
+
+fn manhattan_distance(a: (i64, i64), b: (i64, i64)) -> i64 {
+    (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }

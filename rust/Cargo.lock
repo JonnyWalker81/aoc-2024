@@ -98,6 +98,26 @@ name = "aoc20"
 version = "0.1.0"
 
 [[package]]
+name = "aoc21"
+version = "0.1.0"
+
+[[package]]
+name = "aoc22"
+version = "0.1.0"
+
+[[package]]
+name = "aoc23"
+version = "0.1.0"
+
+[[package]]
+name = "aoc24"
+version = "0.1.0"
+
+[[package]]
+name = "aoc25"
+version = "0.1.0"
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
